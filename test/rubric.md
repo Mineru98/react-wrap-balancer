@@ -1,4 +1,4 @@
-# Equivalence Rubric — vanilla `wrap-balancer` vs react-wrap-balancer
+# Equivalence Rubric — `vanilla-wrap-balancer` vs react-wrap-balancer
 
 > How we prove the vanilla port behaves **identically** to react-wrap-balancer.
 > Designed by an Opus test-architect agent, hardened by an independent Opus adversarial review (which found 2 real bugs + 1 coverage hole — all fixed, see [§5](#5-adversarial-review--bugs-found-and-fixed)), and executed in real browsers ([§6](#6-verification-results)).

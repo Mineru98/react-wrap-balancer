@@ -1,5 +1,5 @@
 {
-  "name": "@mineru98/wrap-balancer",
+  "name": "vanilla-wrap-balancer",
   "version": "1.0.0",
   "description": "Dependency-free, framework-free port of react-wrap-balancer. Balance text wrapping with a single <script> tag.",
   "main": "wrap-balancer.js",
@@ -32,9 +32,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Mineru98/react-wrap-balancer.git"
+    "url": "https://github.com/Mineru98/vanilla-wrap-balancer.git"
   },
-  "homepage": "https://github.com/Mineru98/react-wrap-balancer#readme",
+  "homepage": "https://github.com/Mineru98/vanilla-wrap-balancer#readme",
   "devDependencies": {
     "esbuild": "^0.21.5"
   }

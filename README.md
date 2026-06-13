@@ -1,12 +1,12 @@
-# wrap-balancer (vanilla)
+# vanilla-wrap-balancer
 
 > A dependency-free, framework-free port of [**react-wrap-balancer**](https://github.com/shuding/react-wrap-balancer). Drop one `<script>` tag onto any plain HTML page and your titles stop dropping a single lonely word onto the last line.
 
 🇰🇷 한국어 문서: [README.ko.md](./README.ko.md)
 
-![wrap-balancer demo — Korean text, default wrapping vs balanced](./.github/demo.gif)
+![vanilla-wrap-balancer demo — Korean text, default wrapping vs balanced](./.github/demo.gif)
 
-<sub>Same sentence, same width: **기본 줄바꿈 (default)** strands a single word on the last line, while **wrap-balancer** evens the lines out. (Korean, `word-break: keep-all`.)</sub>
+<sub>Same sentence, same width: **기본 줄바꿈 (default)** strands a single word on the last line, while **vanilla-wrap-balancer** evens the lines out. (Korean, `word-break: keep-all`.)</sub>
 
 The core binary-search algorithm (`relayout`) is **ported verbatim** from react-wrap-balancer (MIT © Shu Ding). This package only re-implements the parts React used to provide — unique id generation, inline styling, native feature detection, "re-balance on content change", and observer cleanup — so it can run with no build step and no framework.
 
@@ -52,7 +52,7 @@ Copy `wrap-balancer.min.js` next to your HTML and include it:
 Or load it from a CDN that serves the fork (jsDelivr mirrors GitHub):
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Mineru98/react-wrap-balancer@main/wrap-balancer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js"></script>
 ```
 
 ### Option B — ES module / bundler
@@ -206,7 +206,7 @@ The algorithm is **deterministic**: for an identical container width, text, and 
 
 ## Coming from react-wrap-balancer?
 
-| react-wrap-balancer (React) | wrap-balancer (vanilla) |
+| react-wrap-balancer (React) | vanilla-wrap-balancer |
 |---|---|
 | `<Balancer>text</Balancer>` | `<h1 data-br-balance>text</h1>` or `WrapBalancer.balance(el)` |
 | `ratio` prop | `ratio` option / `data-br-ratio` |
