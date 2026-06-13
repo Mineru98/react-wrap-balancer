@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · 03 · Balance ratio</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; }
+      .frame { width: 460px; border: 1px dashed #bbb; padding: 16px; margin: 16px 0; border-radius: 8px; }
+      h1 { font-size: 26px; line-height: 1.25; margin: 0; }
+      .controls { margin: 16px 0; }
+      code { background: #f3f3f3; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h2>③ Balance ratio (0 → 1)</h2>
+    <p>
+      <code>ratio</code> interpolates between the browser default (<code>0</code>)
+      and a fully compact balance (<code>1</code>). Drag the slider.
+    </p>
+
+    <div class="controls">
+      ratio: <input id="r" type="range" min="0" max="1" step="0.05" value="1" />
+      <span id="rv">1.00</span>
+    </div>
+
+    <div class="frame">
+      <h1 id="title">Designing typography that reads well on any screen size</h1>
+    </div>
+
+    <script src="../wrap-balancer.js" data-auto="false"></script>
+    <script>
+      var slider = document.getElementById('r')
+      var label = document.getElementById('rv')
+
+      function apply() {
+        var ratio = parseFloat(slider.value)
+        label.textContent = ratio.toFixed(2)
+        // Re-calling balance() on the same element is idempotent: it just
+        // updates the ratio and re-balances (no double-wrapping).
+        WrapBalancer.balance('#title', { ratio: ratio, preferNative: false })
+      }
+
+      slider.addEventListener('input', apply)
+      apply()
+    </script>
+  </body>
+</html>

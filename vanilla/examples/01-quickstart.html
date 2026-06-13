@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · 01 · Quick start (zero JS)</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; }
+      .frame { width: 380px; border: 1px dashed #bbb; padding: 16px; margin: 16px 0; border-radius: 8px; }
+      h1 { font-size: 28px; line-height: 1.25; margin: 0; }
+      code { background: #f3f3f3; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h2>① Quick start — no JavaScript to write</h2>
+    <p>
+      Drop in the script and add <code>data-br-balance</code> to any text element.
+      It balances automatically on load and on resize.
+    </p>
+
+    <div class="frame">
+      <h1 data-br-balance>The quick brown fox jumps over the lazy dog tonight</h1>
+    </div>
+
+    <!--
+      That's it. The script auto-initialises every [data-br-balance] element
+      once the DOM is ready (and again after web fonts settle).
+    -->
+    <script src="../wrap-balancer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>wrap-balancer · minified-artifact parity</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; font-size: 24px; }
+      #arena { position: absolute; left: -99999px; top: 0; font-size: 24px; font-family: Arial; }
+      #out { font-size: 14px; padding: 10px; border-radius: 6px; }
+      .ok { background: #e7f8ec; color: #0a7a2f; }
+      .bad { background: #fdeaea; color: #b00020; }
+    </style>
+  </head>
+  <body>
+    <h1 style="font-size:18px">Minified artifact parity — the file users actually load</h1>
+    <pre id="out">running…</pre>
+    <div id="arena"></div>
+
+    <!-- Load the SHIPPED minified build, not the source. -->
+    <script src="../wrap-balancer.min.js" data-auto="false"></script>
+    <script>
+      // original relayout, transcribed from src/index.tsx (31-90)
+      function makeOriginalRelayout() {
+        var relayout = function (id, ratio, wrapper) {
+          wrapper = wrapper || document.querySelector('[data-br="' + id + '"]')
+          var container = wrapper && wrapper.parentElement
+          if (!container) return
+          var update = function (w) { return (wrapper.style.maxWidth = w + 'px') }
+          wrapper.style.maxWidth = ''
+          var width = container.clientWidth, height = container.clientHeight
+          var lower = width / 2 - 0.25, upper = width + 0.5, middle
+          if (width) {
+            update(lower)
+            lower = Math.max(wrapper.scrollWidth, lower)
+            while (lower + 1 < upper) {
+              middle = Math.round((lower + upper) / 2)
+              update(middle)
+              if (container.clientHeight === height) upper = middle
+              else lower = middle
+            }
+            update(upper * ratio + width * (1 - ratio))
+          }
+          if (!wrapper['__wrap_o'] && typeof ResizeObserver !== 'undefined') {
+            ;(wrapper['__wrap_o'] = new ResizeObserver(function () {
+              relayout(0, +wrapper.dataset.brr, wrapper)
+            })).observe(container)
+          }
+        }
+        return relayout
+      }
+      var orig = makeOriginalRelayout()
+      var arena = document.getElementById('arena')
+      var rand = (function (s) { return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } })(99)
+      function title() {
+        var parts = [], n = Math.floor(rand() * 8) + 2
+        for (var i = 0; i < n; i++) {
+          var L = Math.floor(rand() * (rand() < 0.2 ? 34 : 9)) + 2, w = ''
+          for (var j = 0; j < L; j++) w += String.fromCharCode(97 + Math.floor(rand() * 26))
+          parts.push(w)
+        }
+        return parts.join(' ')
+      }
+      function build(width, text) {
+        var c = document.createElement('div'); c.style.width = width + 'px'
+        var w = document.createElement('span')
+        w.style.cssText = 'display:inline-block;vertical-align:top;text-decoration:inherit;text-wrap:initial'
+        w.setAttribute('data-br', 'x'); w.setAttribute('data-brr', '1'); w.textContent = text
+        c.appendChild(w); arena.appendChild(c); return { c: c, w: w }
+      }
+      function drop(w) { if (w['__wrap_o']) { w['__wrap_o'].disconnect(); delete w['__wrap_o'] } }
+
+      var widths = [200, 320, 460, 640], ratios = [0, 0.5, 1]
+      var total = 0, pass = 0, fails = []
+      for (var wi = 0; wi < widths.length; wi++) for (var ri = 0; ri < ratios.length; ri++) for (var t = 0; t < 12; t++) {
+        var text = title()
+        var a = build(widths[wi], text); a.w.setAttribute('data-brr', String(ratios[ri]))
+        orig('x', ratios[ri], a.w); var om = a.w.style.maxWidth; drop(a.w)
+        var b = build(widths[wi], text); b.w.setAttribute('data-brr', String(ratios[ri]))
+        WrapBalancer.relayout('x', ratios[ri], b.w); var vm = b.w.style.maxWidth; drop(b.w)
+        total++; if (om === vm) pass++; else if (fails.length < 10) fails.push(widths[wi] + 'px r=' + ratios[ri] + ' ' + om + ' vs ' + vm)
+        arena.removeChild(a.c); arena.removeChild(b.c)
+      }
+
+      var apiOK = WrapBalancer && typeof WrapBalancer.balance === 'function' && typeof WrapBalancer.relayout === 'function'
+      window.__MIN_PARITY__ = { total: total, pass: pass, fails: fails, apiOK: apiOK, version: WrapBalancer.version }
+      window.__MIN_DONE__ = true
+      var allPass = pass === total && apiOK
+      var out = document.getElementById('out')
+      out.className = allPass ? 'ok' : 'bad'
+      out.textContent = (allPass ? '✓ PASS' : '✗ FAIL') + ' — minified build ' + pass + '/' + total +
+        ' byte-identical to original; API present=' + apiOK + ' (v' + WrapBalancer.version + ')' +
+        (fails.length ? '\n' + fails.join('\n') : '')
+    </script>
+  </body>
+</html>

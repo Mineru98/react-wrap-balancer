@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · 05 · Before / after</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+      .row { display: flex; gap: 24px; flex-wrap: wrap; }
+      .col { flex: 1 1 280px; }
+      .frame { width: 300px; border: 1px solid #e0e0e0; background: #fafafa; padding: 16px; border-radius: 8px; }
+      h1 { font-size: 24px; line-height: 1.25; margin: 0; }
+      .tag { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+    </style>
+  </head>
+  <body>
+    <h2>⑤ Before / after — same text, same width</h2>
+
+    <div class="row">
+      <div class="col">
+        <div class="tag">Default wrapping (control)</div>
+        <div class="frame">
+          <h1>Make your titles more readable on every screen size</h1>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="tag">Balanced — JS algorithm</div>
+        <div class="frame">
+          <h1 data-br-balance data-br-prefer-native="false">
+            Make your titles more readable on every screen size
+          </h1>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="tag">Balanced — native if available</div>
+        <div class="frame">
+          <h1 data-br-balance>
+            Make your titles more readable on every screen size
+          </h1>
+        </div>
+      </div>
+    </div>
+
+    <script src="../wrap-balancer.js"></script>
+  </body>
+</html>

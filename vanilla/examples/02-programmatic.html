@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · 02 · Programmatic API</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; }
+      .frame { width: 420px; border: 1px dashed #bbb; padding: 16px; margin: 16px 0; border-radius: 8px; }
+      h1 { font-size: 26px; line-height: 1.25; margin: 0; }
+      code { background: #f3f3f3; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h2>② Programmatic API</h2>
+    <p>
+      Disable auto-init with <code>data-auto="false"</code> and call the global
+      <code>WrapBalancer</code> yourself — pass a selector, an element, or a NodeList.
+    </p>
+
+    <div class="frame">
+      <h1 class="title">Beautifully balanced headlines for every viewport size</h1>
+    </div>
+
+    <!-- data-auto="false" => the library does not auto-run; you drive it. -->
+    <script src="../wrap-balancer.js" data-auto="false"></script>
+    <script>
+      // Balance by CSS selector. Returns an array of handles.
+      var handles = WrapBalancer.balance('.title', {
+        ratio: 1, // 0 = no balance, 1 = fully balanced (default)
+        preferNative: true, // use native CSS text-wrap:balance when available
+      })
+
+      console.log('balanced', handles.length, 'element(s)')
+      // handles[0].rebalance()  // force a re-balance
+      // handles[0].destroy()    // disconnect observers & reset
+    </script>
+  </body>
+</html>

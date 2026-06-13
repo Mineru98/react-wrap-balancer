@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · equivalence harness</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 24px;
+        line-height: 1.4;
+      }
+      h1 { font-size: 18px; }
+      #summary {
+        font-size: 16px;
+        font-weight: bold;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 16px 0;
+      }
+      .ok { background: #e7f8ec; color: #0a7a2f; }
+      .bad { background: #fdeaea; color: #b00020; }
+      .arena {
+        position: absolute;
+        left: -99999px;
+        top: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 24px;
+      }
+      table { border-collapse: collapse; font-size: 12px; }
+      td, th { border: 1px solid #ddd; padding: 4px 8px; text-align: left; }
+      #coverage { font-size: 13px; margin: 8px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>wrap-balancer · algorithmic equivalence harness</h1>
+    <p>
+      Feeds byte-identical DOM to the <strong>original react-wrap-balancer</strong>
+      <code>relayout</code> (transcribed verbatim from <code>src/index.tsx</code>,
+      lines 31-90) and the <strong>vanilla</strong> <code>WrapBalancer.relayout</code> /
+      <code>balance()</code>, then asserts the resulting <code>max-width</code> is
+      byte-identical.
+    </p>
+    <div id="summary">running…</div>
+    <div id="coverage"></div>
+    <div id="details"></div>
+    <div class="arena" id="arena"></div>
+
+    <script src="../wrap-balancer.js" data-auto="false"></script>
+
+    <script>
+      // ----------------------------------------------------------------------
+      // ORIGINAL react-wrap-balancer relayout — transcribed 1:1 from
+      // src/index.tsx (lines 31-90). Algorithm unchanged.
+      // ----------------------------------------------------------------------
+      function makeOriginalRelayout() {
+        var relayout = function (id, ratio, wrapper) {
+          wrapper = wrapper || document.querySelector('[data-br="' + id + '"]')
+          var container = wrapper && wrapper.parentElement
+          if (!container) return
+          var update = function (width) {
+            return (wrapper.style.maxWidth = width + 'px')
+          }
+          wrapper.style.maxWidth = ''
+          var width = container.clientWidth
+          var height = container.clientHeight
+          var lower = width / 2 - 0.25
+          var upper = width + 0.5
+          var middle
+          if (width) {
+            update(lower)
+            lower = Math.max(wrapper.scrollWidth, lower)
+            while (lower + 1 < upper) {
+              middle = Math.round((lower + upper) / 2)
+              update(middle)
+              if (container.clientHeight === height) {
+                upper = middle
+              } else {
+                lower = middle
+              }
+            }
+            update(upper * ratio + width * (1 - ratio))
+          }
+          if (!wrapper['__wrap_o']) {
+            if (typeof ResizeObserver !== 'undefined') {
+              ;(wrapper['__wrap_o'] = new ResizeObserver(function () {
+                relayout(0, +wrapper.dataset.brr, wrapper)
+              })).observe(container)
+            }
+          }
+        }
+        return relayout
+      }
+      var originalRelayout = makeOriginalRelayout()
+
+      // ----------------------------------------------------------------------
+      // Deterministic PRNG + a corpus that DELIBERATELY exercises every branch,
+      // including the `lower = Math.max(scrollWidth, lower)` clamp (which a
+      // uniform 5-char-word corpus never fires — see review finding AE-05).
+      // ----------------------------------------------------------------------
+      function seededRandom(seed) {
+        var s = seed >>> 0
+        return function () {
+          s = (s * 1664525 + 1013904223) >>> 0
+          return s / 4294967296
+        }
+      }
+      var rand = seededRandom(20260613)
+
+      function word(len) {
+        var w = ''
+        for (var j = 0; j < len; j++) w += String.fromCharCode(Math.floor(rand() * 26) + 97)
+        return w
+      }
+      // uniform 5-char words (the original gen.js corpus)
+      function uniformTitle() {
+        var len = Math.floor(rand() * 15) + 1, t = []
+        for (var i = 0; i < len; i++) t.push(word(5))
+        return t.join(' ')
+      }
+      // mixed word lengths
+      function mixedTitle() {
+        var len = Math.floor(rand() * 10) + 2, t = []
+        for (var i = 0; i < len; i++) t.push(word(Math.floor(rand() * 11) + 2))
+        return t.join(' ')
+      }
+      // contains one long UNBREAKABLE token (30-46 chars) -> forces
+      // scrollWidth > width/2 at the seed, firing the clamp at every width.
+      function longTokenTitle() {
+        var t = [word(4), word(30 + Math.floor(rand() * 16)), word(5), word(6)]
+        return t.join(' ')
+      }
+      // a single giant word longer than the whole container (overflow case)
+      function giantWordTitle() {
+        return word(60 + Math.floor(rand() * 20))
+      }
+
+      var arena = document.getElementById('arena')
+
+      function buildSubtree(width, html, useHTML) {
+        var container = document.createElement('div')
+        container.style.width = width + 'px'
+        var wrapper = document.createElement('span')
+        wrapper.style.display = 'inline-block'
+        wrapper.style.verticalAlign = 'top'
+        wrapper.style.textDecoration = 'inherit'
+        wrapper.style.textWrap = 'initial'
+        wrapper.setAttribute('data-br', 'x')
+        wrapper.setAttribute('data-brr', '1')
+        if (useHTML) wrapper.innerHTML = html
+        else wrapper.textContent = html
+        container.appendChild(wrapper)
+        arena.appendChild(container)
+        return { container: container, wrapper: wrapper }
+      }
+
+      function disconnectObserver(wrapper) {
+        if (wrapper['__wrap_o']) {
+          wrapper['__wrap_o'].disconnect()
+          delete wrapper['__wrap_o']
+        }
+      }
+
+      // Does the scrollWidth clamp actually fire for this DOM at this width?
+      function clampFires(wrapper, width) {
+        var lower = width / 2 - 0.25
+        wrapper.style.maxWidth = lower + 'px'
+        var fires = wrapper.scrollWidth > lower
+        wrapper.style.maxWidth = ''
+        return fires
+      }
+
+      var widths = [180, 240, 320, 400, 520, 680, 820]
+      var ratios = [0, 0.25, 0.5, 0.75, 1]
+      var results = { total: 0, passed: 0, failed: 0, clampFired: 0, failures: [] }
+
+      function compareCase(testName, width, ratio, html, useHTML) {
+        var a = buildSubtree(width, html, useHTML)
+        a.wrapper.setAttribute('data-brr', String(ratio))
+        if (clampFires(a.wrapper, width)) results.clampFired++
+        originalRelayout('x', ratio, a.wrapper)
+        var origMax = a.wrapper.style.maxWidth
+        disconnectObserver(a.wrapper)
+
+        var b = buildSubtree(width, html, useHTML)
+        b.wrapper.setAttribute('data-brr', String(ratio))
+        WrapBalancer.relayout('x', ratio, b.wrapper)
+        var vanMax = b.wrapper.style.maxWidth
+        disconnectObserver(b.wrapper)
+
+        results.total++
+        if (origMax === vanMax) {
+          results.passed++
+        } else {
+          results.failed++
+          if (results.failures.length < 40) {
+            results.failures.push({ test: testName, width: width, ratio: ratio, original: origMax, vanilla: vanMax, text: (useHTML ? html : html.slice(0, 60)) })
+          }
+        }
+        arena.removeChild(a.container)
+        arena.removeChild(b.container)
+      }
+
+      // --- Test A: relayout equivalence across a branch-covering corpus ------
+      var generators = [uniformTitle, mixedTitle, longTokenTitle, giantWordTitle]
+      for (var wi = 0; wi < widths.length; wi++) {
+        for (var ri = 0; ri < ratios.length; ri++) {
+          for (var g = 0; g < generators.length; g++) {
+            for (var t = 0; t < 4; t++) {
+              compareCase('A:' + generators[g].name, widths[wi], ratios[ri], generators[g]())
+            }
+          }
+        }
+      }
+
+      // --- Test B: high-level balance() (auto-wrap) vs original relayout ------
+      for (var wi2 = 0; wi2 < widths.length; wi2++) {
+        for (var t2 = 0; t2 < 8; t2++) {
+          var width2 = widths[wi2]
+          var text2 = (t2 % 2 ? longTokenTitle() : mixedTitle())
+          var ref = buildSubtree(width2, text2)
+          ref.wrapper.setAttribute('data-brr', '1')
+          originalRelayout('x', 1, ref.wrapper)
+          var refMax = ref.wrapper.style.maxWidth
+          disconnectObserver(ref.wrapper)
+
+          var outer = document.createElement('div')
+          outer.style.width = width2 + 'px'
+          outer.textContent = text2
+          arena.appendChild(outer)
+          var handles = WrapBalancer.balance(outer, { ratio: 1, preferNative: false })
+          var apiMax = handles[0].wrapper.style.maxWidth
+          handles[0].destroy()
+
+          results.total++
+          if (refMax === apiMax) results.passed++
+          else {
+            results.failed++
+            if (results.failures.length < 40) results.failures.push({ test: 'B:balance()', width: width2, ratio: 1, original: refMax, vanilla: apiMax, text: text2.slice(0, 60) })
+          }
+          arena.removeChild(ref.container)
+          arena.removeChild(outer)
+        }
+      }
+
+      // --- Test C: inline markup (<b>,<a>) and forced <br> line breaks -------
+      var htmlSamples = [
+        'A title with <b>bold</b> and <a href="#">linked</a> inline words inside it here',
+        'Forced<br>break in the<br>middle of the heading text content goes here now',
+        'Mixed <em>emphasis</em> and a longlonglonglongunbreakabletoken plus normal words',
+        'Leading and trailing whitespace   with   irregular   spacing   between   words',
+      ]
+      for (var wi3 = 0; wi3 < widths.length; wi3++) {
+        for (var h = 0; h < htmlSamples.length; h++) {
+          compareCase('C:inline', widths[wi3], 1, htmlSamples[h], true)
+        }
+      }
+
+      // ----------------------------------------------------------------------
+      window.__RESULTS__ = results
+      var clampOK = results.clampFired > 0
+      var allPass = results.failed === 0 && clampOK
+      var summary = document.getElementById('summary')
+      summary.className = allPass ? 'ok' : 'bad'
+      summary.textContent =
+        (allPass ? '✓ PASS' : '✗ FAIL') + ' — ' + results.passed + '/' + results.total +
+        ' cases byte-identical maxWidth' + (results.failed ? ' (' + results.failed + ' mismatches)' : '')
+
+      document.getElementById('coverage').innerHTML =
+        'Branch coverage — scrollWidth clamp fired in <strong>' + results.clampFired + '</strong> cases ' +
+        (clampOK ? '✓ (clamp path proven)' : '✗ (CLAMP NEVER FIRED — coverage hole)')
+
+      if (results.failures.length) {
+        document.getElementById('details').innerHTML =
+          '<table><thead><tr><th>test</th><th>container</th><th>ratio</th><th>original</th><th>vanilla</th><th>text</th></tr></thead><tbody>' +
+          results.failures.map(function (f) {
+            return '<tr><td>' + f.test + '</td><td>' + f.width + 'px</td><td>' + f.ratio + '</td><td>' + f.original + '</td><td>' + f.vanilla + '</td><td>' + f.text + '</td></tr>'
+          }).join('') + '</tbody></table>'
+      }
+    </script>
+  </body>
+</html>

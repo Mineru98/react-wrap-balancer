@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · examples</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 640px; margin: 48px auto; padding: 0 20px; line-height: 1.6; }
+      h1 { font-size: 24px; }
+      ul { padding-left: 18px; }
+      li { margin: 8px 0; }
+      a { color: #0b62d6; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .muted { color: #777; font-size: 14px; }
+      code { background: #f3f3f3; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>wrap-balancer · examples</h1>
+    <p class="muted">Vanilla-JS port of react-wrap-balancer. Each page is a self-contained demo.</p>
+
+    <h2>Examples</h2>
+    <ul>
+      <li><a href="01-quickstart.html">01 · Quick start</a> — zero-JS auto-init with <code>data-br-balance</code></li>
+      <li><a href="02-programmatic.html">02 · Programmatic API</a> — <code>WrapBalancer.balance(selector)</code></li>
+      <li><a href="03-ratio.html">03 · Balance ratio</a> — interactive <code>ratio</code> slider</li>
+      <li><a href="04-dynamic.html">04 · Dynamic content</a> — auto re-balance on text change</li>
+      <li><a href="05-comparison.html">05 · Before / after</a> — balanced vs unbalanced, side by side</li>
+    </ul>
+
+    <h2>Tests</h2>
+    <ul>
+      <li><a href="../test/equivalence.html">Equivalence harness</a> — byte-identical vs the React original (504 cases)</li>
+      <li><a href="../test/behaviors.html">Behavior tests</a> — observers, ratio, destroy, native fallback</li>
+    </ul>
+
+    <p class="muted">Docs: <a href="../README.md">README (EN)</a> · <a href="../README.ko.md">README (한국어)</a></p>
+  </body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>wrap-balancer · behavior tests</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; font-size: 24px; }
+      #arena { position: absolute; left: -99999px; top: 0; font-size: 24px; font-family: Arial; }
+      #out { font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h1 style="font-size:18px">wrap-balancer · behavior tests</h1>
+    <pre id="out">running…</pre>
+    <div id="arena"></div>
+
+    <script src="../wrap-balancer.js" data-auto="false"></script>
+    <script>
+      var arena = document.getElementById('arena')
+      var LONG = 'Make your titles more readable on every screen size today'
+
+      function raf() { return new Promise(function (r) { requestAnimationFrame(function () { r() }) }) }
+      function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms) }) }
+      async function settle() { await raf(); await raf(); await sleep(40) }
+
+      var results = []
+      function check(name, cond, detail) {
+        results.push({ name: name, pass: !!cond, detail: detail || '' })
+      }
+
+      function mkContainer(width) {
+        var d = document.createElement('div')
+        d.style.width = width + 'px'
+        arena.appendChild(d)
+        return d
+      }
+
+      async function run() {
+        // 1) Idempotency — balancing twice does not double-wrap
+        var c1 = mkContainer(300)
+        c1.textContent = LONG
+        var h1a = WrapBalancer.balance(c1, { preferNative: false })[0]
+        var h1b = WrapBalancer.balance(c1, { preferNative: false })[0]
+        await settle()
+        var wrappers = c1.querySelectorAll(':scope > [data-br]')
+        check('idempotent: single wrapper', wrappers.length === 1, 'count=' + wrappers.length)
+        check('idempotent: same id reused', h1a.id === h1b.id, h1a.id + ' vs ' + h1b.id)
+
+        // 2) ratio: 0 (full width) vs 1 (compact)
+        var c2 = mkContainer(300)
+        c2.textContent = LONG
+        var h2 = WrapBalancer.balance(c2, { ratio: 1, preferNative: false })[0]
+        await settle()
+        var maxAt1 = parseFloat(h2.wrapper.style.maxWidth)
+        WrapBalancer.balance(c2, { ratio: 0, preferNative: false })
+        await settle()
+        var maxAt0 = parseFloat(h2.wrapper.style.maxWidth)
+        check('ratio=1 is compact (< container)', maxAt1 < 300, 'maxAt1=' + maxAt1)
+        check('ratio=0 ≈ full container width', maxAt0 >= maxAt1, 'maxAt0=' + maxAt0 + ' maxAt1=' + maxAt1)
+
+        // 3) MutationObserver — changing text re-balances
+        var c3 = mkContainer(300)
+        c3.textContent = LONG
+        var h3 = WrapBalancer.balance(c3, { ratio: 1, preferNative: false })[0]
+        await settle()
+        var before = h3.wrapper.style.maxWidth
+        h3.wrapper.textContent = 'Tiny'
+        await settle()
+        var after = h3.wrapper.style.maxWidth
+        check('MutationObserver re-balances on text change', before !== after, before + ' -> ' + after)
+
+        // 4) ResizeObserver — changing container width re-balances
+        var c4 = mkContainer(300)
+        c4.textContent = LONG
+        var h4 = WrapBalancer.balance(c4, { ratio: 1, preferNative: false })[0]
+        await settle()
+        var rBefore = h4.wrapper.style.maxWidth
+        c4.style.width = '520px'
+        await settle()
+        var rAfter = h4.wrapper.style.maxWidth
+        check('ResizeObserver re-balances on container resize', rBefore !== rAfter, rBefore + ' -> ' + rAfter)
+
+        // 5) destroy() — observers disconnected, maxWidth reset, no further reaction
+        var c5 = mkContainer(300)
+        c5.textContent = LONG
+        var h5 = WrapBalancer.balance(c5, { ratio: 1, preferNative: false })[0]
+        await settle()
+        h5.destroy()
+        var clearedMax = h5.wrapper.style.maxWidth
+        check('destroy: maxWidth cleared', clearedMax === '', 'maxWidth="' + clearedMax + '"')
+        c5.style.width = '600px'
+        h5.wrapper.textContent = 'Different text entirely now'
+        await settle()
+        check('destroy: no re-balance after teardown', h5.wrapper.style.maxWidth === '', 'maxWidth="' + h5.wrapper.style.maxWidth + '"')
+
+        // 6) preferNative on a supporting browser -> skip JS, no maxWidth, no observers
+        var nativeOK = WrapBalancer.isNativeSupported()
+        var c6 = mkContainer(300)
+        c6.textContent = LONG
+        var h6 = WrapBalancer.balance(c6, { preferNative: true })[0]
+        await settle()
+        if (nativeOK) {
+          check('native: usingNative flag set', h6.usingNative === true, 'usingNative=' + h6.usingNative)
+          check('native: no JS maxWidth applied', h6.wrapper.style.maxWidth === '', 'maxWidth="' + h6.wrapper.style.maxWidth + '"')
+          check('native: text-wrap:balance set', h6.wrapper.style.textWrap === 'balance', 'textWrap=' + h6.wrapper.style.textWrap)
+        } else {
+          check('native: (unsupported here) JS path used', h6.usingNative === false, 'usingNative=' + h6.usingNative)
+        }
+
+        // 7) wrap:false -> element itself is the wrapper
+        var c7 = mkContainer(300)
+        var span7 = document.createElement('span')
+        span7.id = 'w7'
+        span7.textContent = LONG
+        c7.appendChild(span7)
+        var h7 = WrapBalancer.balance('#w7', { wrap: false, preferNative: false })[0]
+        await settle()
+        check('wrap:false uses the element as wrapper', h7.wrapper === span7, 'wrapper.id=' + h7.wrapper.id)
+        check('wrap:false balances (maxWidth set)', parseFloat(h7.wrapper.style.maxWidth) > 0, 'maxWidth=' + h7.wrapper.style.maxWidth)
+
+        // 8) EC-10: destroy() then balance() must NOT nest wrappers (regression
+        //    for the double-wrap bug found in adversarial review).
+        var c8 = mkContainer(300)
+        c8.textContent = LONG
+        for (var k = 0; k < 5; k++) {
+          var h8 = WrapBalancer.balance(c8, { preferNative: false })[0]
+          await settle()
+          h8.destroy()
+        }
+        WrapBalancer.balance(c8, { preferNative: false })
+        await settle()
+        var brs = c8.querySelectorAll('[data-br]')
+        var nested = false
+        for (var n = 0; n < brs.length; n++) {
+          if (brs[n].parentElement && brs[n].parentElement.closest('[data-br]')) nested = true
+        }
+        check('EC-10: destroy→balance keeps a single wrapper', brs.length === 1, 'data-br count=' + brs.length)
+        check('EC-10: no nested wrappers after 5 cycles', !nested, 'nested=' + nested)
+
+        // 9) AB-06: a falsy option must override a conflicting data-* attribute.
+        //    Real usage: mark the container element, auto-wrap (default). The
+        //    container width is 300, so ratio:0 (no balance) => maxWidth 300px,
+        //    proving option ratio:0 beat the data-br-ratio="0.75" attribute.
+        var c9 = mkContainer(300)
+        c9.setAttribute('data-br-ratio', '0.75') // attribute says 0.75
+        c9.textContent = LONG
+        var h9 = WrapBalancer.balance(c9, { ratio: 0, preferNative: false })[0]
+        await settle()
+        var w9 = parseFloat(h9.wrapper.style.maxWidth)
+        check('AB-06: option ratio:0 beats attr 0.75 (maxWidth≈full)', w9 >= 299 && w9 <= 301, 'maxWidth=' + w9)
+
+        // 10) EC-09: detached (no parent) vs hidden (display:none) are distinct.
+        var detached = document.createElement('span')
+        detached.setAttribute('data-br', 'd1')
+        detached.setAttribute('data-brr', '1')
+        detached.textContent = LONG
+        var threw = false
+        try { WrapBalancer.relayout('d1', 1, detached) } catch (e) { threw = true }
+        check('EC-09a: detached element does not crash', !threw, 'threw=' + threw)
+        check('EC-09a: detached → no observer attached', !detached['__wrap_o'], 'observer=' + !!detached['__wrap_o'])
+
+        var c10 = mkContainer(300)
+        c10.style.display = 'none'
+        c10.textContent = LONG
+        var h10 = WrapBalancer.balance(c10, { preferNative: false })[0]
+        await settle()
+        check('EC-09b: hidden(display:none) → maxWidth empty', h10.wrapper.style.maxWidth === '', 'maxWidth="' + h10.wrapper.style.maxWidth + '"')
+        c10.style.display = ''
+        await settle()
+        check('EC-09b: reveal → ResizeObserver re-balances', parseFloat(h10.wrapper.style.maxWidth) > 0, 'maxWidth=' + h10.wrapper.style.maxWidth)
+
+        // 11) Finding-1: switching JS→native via re-balance() tears down the JS
+        //     machinery and clears the stale maxWidth (else native is corrupted).
+        if (nativeOK) {
+          var c11 = mkContainer(300)
+          c11.textContent = LONG
+          var h11 = WrapBalancer.balance(c11, { preferNative: false })[0]
+          await settle()
+          var jsMax = h11.wrapper.style.maxWidth
+          WrapBalancer.balance(c11, { preferNative: true }) // switch to native
+          await settle()
+          var w11 = h11.wrapper
+          check('JS→native: usingNative set', w11['__wrap_h'].usingNative === true)
+          check('JS→native: stale maxWidth cleared', w11.style.maxWidth === '', 'was ' + jsMax + ' now "' + w11.style.maxWidth + '"')
+          check('JS→native: ResizeObserver removed', !w11['__wrap_o'], 'ro=' + !!w11['__wrap_o'])
+          check('JS→native: MutationObserver removed', !w11['__wrap_m'], 'mo=' + !!w11['__wrap_m'])
+          c11.style.width = '520px'
+          await settle()
+          check('JS→native: resize does NOT re-introduce JS maxWidth', w11.style.maxWidth === '', 'maxWidth="' + w11.style.maxWidth + '"')
+        }
+
+        // 12) Finding-2: switching native→JS via re-balance() attaches the
+        //     MutationObserver so content-only changes re-balance.
+        if (nativeOK) {
+          var c12 = mkContainer(300)
+          c12.textContent = LONG
+          var h12 = WrapBalancer.balance(c12, { preferNative: true })[0] // native: no observers
+          await settle()
+          check('native start: no MutationObserver', !h12.wrapper['__wrap_m'])
+          WrapBalancer.balance(c12, { preferNative: false }) // switch to JS
+          await settle()
+          check('native→JS: MutationObserver attached', !!h12.wrapper['__wrap_m'])
+          var before12 = h12.wrapper.style.maxWidth
+          h12.wrapper.textContent = 'Short'
+          await settle()
+          check('native→JS: content change re-balances', h12.wrapper.style.maxWidth !== before12, before12 + ' -> ' + h12.wrapper.style.maxWidth)
+        }
+
+        // 13) Finding-3: resolveTargets robustness — null in array / bad selector
+        //     must not throw, and a valid element in a mixed array still balances.
+        var c13 = mkContainer(300)
+        c13.textContent = LONG
+        var threw13a = false, handles13
+        try { handles13 = WrapBalancer.balance([c13, null], { preferNative: false }) } catch (e) { threw13a = true }
+        check('robust: array containing null does not throw', !threw13a, 'threw=' + threw13a)
+        check('robust: valid element in mixed array still balanced', !!(handles13 && handles13.length === 1), 'handles=' + (handles13 ? handles13.length : 'n/a'))
+        var threw13b = false
+        try { WrapBalancer.balance('div::::bogus!!!') } catch (e) { threw13b = true }
+        check('robust: invalid selector string does not throw', !threw13b, 'threw=' + threw13b)
+
+        // Report
+        var passed = results.filter(function (r) { return r.pass }).length
+        window.__BEHAVIORS__ = { total: results.length, passed: passed, failed: results.length - passed, results: results, nativeSupported: nativeOK }
+        window.__BEHAVIORS_DONE__ = true
+        document.getElementById('out').textContent =
+          (passed === results.length ? '✓ ALL PASS' : '✗ FAIL') + ' (' + passed + '/' + results.length + ')\n\n' +
+          results.map(function (r) { return (r.pass ? '✓ ' : '✗ ') + r.name + (r.detail ? '  [' + r.detail + ']' : '') }).join('\n')
+      }
+
+      run()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · 04 · Dynamic content</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; }
+      .frame { width: 440px; border: 1px dashed #bbb; padding: 16px; margin: 16px 0; border-radius: 8px; }
+      h1 { font-size: 26px; line-height: 1.25; margin: 0; }
+      button { font-size: 14px; padding: 6px 12px; margin-right: 8px; }
+    </style>
+  </head>
+  <body>
+    <h2>④ Dynamic content re-balances automatically</h2>
+    <p>
+      A <code>MutationObserver</code> watches the text. Change it and the balance
+      recomputes — no manual call needed (mirrors React re-balancing on children change).
+    </p>
+
+    <div>
+      <button id="short">Short title</button>
+      <button id="long">Long title</button>
+    </div>
+
+    <div class="frame">
+      <h1 data-br-balance id="title">Click a button to change this headline text</h1>
+    </div>
+
+    <script src="../wrap-balancer.js"></script>
+    <script>
+      // The wrapper is the inner <span> the library created inside #title.
+      function setText(t) {
+        var title = document.getElementById('title')
+        var wrapper = title.firstElementChild || title
+        wrapper.textContent = t // triggers the MutationObserver -> re-balance
+      }
+      document.getElementById('short').onclick = function () {
+        setText('A concise headline')
+      }
+      document.getElementById('long').onclick = function () {
+        setText('An intentionally much longer headline that needs balancing across lines')
+      }
+    </script>
+  </body>
+</html>
