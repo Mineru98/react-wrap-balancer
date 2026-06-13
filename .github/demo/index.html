@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wrap-balancer · demo</title>
+    <style>
+      :root {
+        --ink: #14161c;
+        --muted: #8a8f9c;
+        --line: #e9ebf0;
+        --accent: #4f46e5;
+        --accent-soft: #eef0ff;
+        --warn: #d6455d;
+        --warn-soft: #fdecef;
+        --ok: #18a36e;
+        --ok-soft: #e7f7f0;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        font-family: -apple-system, 'Apple SD Gothic Neo', 'Pretendard', system-ui,
+          'Segoe UI', Roboto, sans-serif;
+        background: radial-gradient(1200px 600px at 50% -10%, #ffffff 0%, #f3f4f8 55%, #eceef4 100%);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+      }
+      .stage {
+        width: 1040px;
+        height: 500px;
+        margin: 0 auto;
+        padding: 36px 40px 30px;
+        display: flex;
+        flex-direction: column;
+      }
+      .caption {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0 0 4px;
+      }
+      .caption .hl { color: var(--accent); }
+      .sub {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0 0 22px;
+        font-weight: 500;
+      }
+      .cards { display: flex; gap: 26px; align-items: stretch; }
+      .card {
+        flex: 1 1 0;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px 22px 20px;
+        box-shadow: 0 18px 40px -24px rgba(20, 22, 28, 0.35);
+        display: flex;
+        flex-direction: column;
+        min-height: 250px;
+      }
+      .head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .dot { width: 9px; height: 9px; border-radius: 50%; }
+      .a .dot { background: var(--warn); }
+      .b .dot { background: var(--ok); }
+      .label {
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: none;
+      }
+      .a .label { color: var(--warn); }
+      .b .label { color: var(--ok); }
+      .tag {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+      .a .tag { color: var(--warn); background: var(--warn-soft); }
+      .b .tag { color: var(--ok); background: var(--ok-soft); }
+
+      /* the resizing container — width is animated in sync for both cards */
+      .frame {
+        position: relative;
+        margin: 4px auto 0;
+        padding: 0;
+        border-left: 2px dashed #d7dae3;
+        border-right: 2px dashed #d7dae3;
+      }
+      h1 {
+        margin: 0;
+        font-size: 25px;
+        line-height: 1.5;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        word-break: keep-all; /* Korean: break on 어절 boundaries */
+        color: var(--ink);
+      }
+      .b h1 { color: #1d2340; }
+
+      .meter {
+        margin-top: auto;
+        padding-top: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .meter .bar {
+        width: 220px; height: 6px; border-radius: 999px;
+        background: var(--line); position: relative; overflow: hidden;
+      }
+      .meter .bar > i {
+        position: absolute; left: 0; top: 0; bottom: 0;
+        background: linear-gradient(90deg, #c7cbf5, var(--accent));
+        border-radius: 999px;
+      }
+      .meter b { color: var(--ink); font-variant-numeric: tabular-nums; }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="caption">제목 마지막 줄에 <span class="hl">한 단어만</span> 남지 않게, 줄을 고르게 맞춥니다</div>
+      <div class="sub">같은 문장 · 같은 너비 — <b>wrap-balancer</b>는 줄 길이를 균형 있게 재배치합니다 (한국어 <code>word-break: keep-all</code>)</div>
+
+      <div class="cards">
+        <div class="card a">
+          <div class="head">
+            <span class="dot"></span><span class="label">기본 줄바꿈</span>
+            <span class="tag">그대로</span>
+          </div>
+          <div class="frame">
+            <h1 class="plain">복잡한 설정 없이 제목 줄바꿈을 자동으로 고르게 맞춰 더 읽기 좋은 화면을 만듭니다</h1>
+          </div>
+        </div>
+
+        <div class="card b">
+          <div class="head">
+            <span class="dot"></span><span class="label">wrap-balancer 적용</span>
+            <span class="tag">균형</span>
+          </div>
+          <div class="frame">
+            <h1 class="balanced" data-br-balance data-br-prefer-native="false">복잡한 설정 없이 제목 줄바꿈을 자동으로 고르게 맞춰 더 읽기 좋은 화면을 만듭니다</h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="meter">
+        컨테이너 너비
+        <span class="bar"><i id="fill"></i></span>
+        <b><span id="w">360</span>px</b>
+      </div>
+    </div>
+
+    <script src="../../wrap-balancer.js" data-auto="false"></script>
+    <script>
+      // Force the JS path so the demo is identical regardless of native support,
+      // and so the ResizeObserver re-balances on every animated width change.
+      WrapBalancer.balance('.balanced', { preferNative: false })
+
+      var frames = Array.prototype.slice.call(document.querySelectorAll('.frame'))
+      var wEl = document.getElementById('w')
+      var fill = document.getElementById('fill')
+      var MIN = 295, MAX = 410
+      var t = 0
+
+      function setW(w) {
+        for (var i = 0; i < frames.length; i++) frames[i].style.width = w + 'px'
+        wEl.textContent = w
+        fill.style.width = (10 + 90 * ((w - MIN) / (MAX - MIN))) + '%'
+        window.__W__ = w
+      }
+
+      function frame() {
+        if (!window.__paused) {
+          t += 0.016
+          // ease in/out via cosine: smooth "breathing" resize
+          var k = 0.5 - 0.5 * Math.cos(t)
+          setW(Math.round(MIN + (MAX - MIN) * k))
+        }
+        requestAnimationFrame(frame)
+      }
+      // expose controls for a recorder / inspector
+      window.__setW = setW
+      window.__paused = false
+      // Deterministic per-frame render for a seamless-loop recorder: sets the
+      // width along one cosine breathing cycle and re-balances SYNCHRONOUSLY
+      // (balance() is idempotent and re-runs relayout immediately), so each
+      // captured frame is correct without waiting on the async ResizeObserver.
+      window.__renderFrame = function (i, n) {
+        window.__paused = true
+        var k = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n)
+        setW(Math.round(MIN + (MAX - MIN) * k))
+        WrapBalancer.balance('.balanced', { preferNative: false })
+      }
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>

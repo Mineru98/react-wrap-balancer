@@ -4,7 +4,9 @@
 
 🇺🇸 English: [README.md](./README.md)
 
-![적용 전/후](./test/equivalence-result.png)
+![wrap-balancer 데모 — 한국어, 기본 줄바꿈 vs 균형](./.github/demo.gif)
+
+<sub>같은 문장·같은 너비 — **기본 줄바꿈**은 마지막 줄에 한 단어만 덩그러니 남기지만, **wrap-balancer**는 줄 길이를 고르게 맞춥니다. (한국어 `word-break: keep-all`)</sub>
 
 핵심 이진 탐색 알고리즘(`relayout`)은 react-wrap-balancer(MIT © Shu Ding)에서 **한 글자도 바꾸지 않고 그대로** 가져왔습니다. 이 패키지는 그동안 React가 대신 해주던 부분 — 고유 id 생성, 인라인 스타일 적용, 네이티브 기능 감지, "내용이 바뀌면 다시 균형 잡기", 옵저버 정리 — 만 바닐라로 다시 구현했습니다. 그래서 빌드 과정도, 프레임워크도 필요 없습니다.
 

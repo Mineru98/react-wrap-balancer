@@ -4,7 +4,9 @@
 
 🇰🇷 한국어 문서: [README.ko.md](./README.ko.md)
 
-![before / after](./test/equivalence-result.png)
+![wrap-balancer demo — Korean text, default wrapping vs balanced](./.github/demo.gif)
+
+<sub>Same sentence, same width: **기본 줄바꿈 (default)** strands a single word on the last line, while **wrap-balancer** evens the lines out. (Korean, `word-break: keep-all`.)</sub>
 
 The core binary-search algorithm (`relayout`) is **ported verbatim** from react-wrap-balancer (MIT © Shu Ding). This package only re-implements the parts React used to provide — unique id generation, inline styling, native feature detection, "re-balance on content change", and observer cleanup — so it can run with no build step and no framework.
 
