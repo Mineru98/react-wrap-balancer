@@ -43,16 +43,16 @@ every screen size             ← balanced
 
 ### Option A — `<script>` tag (recommended for plain HTML pages)
 
-Copy `wrap-balancer.min.js` next to your HTML and include it:
-
-```html
-<script src="wrap-balancer.min.js"></script>
-```
-
-Or load it from a CDN that serves the fork (jsDelivr mirrors GitHub):
+Load it straight from the **jsDelivr CDN** — nothing to install or build:
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js"></script>
+```
+
+`@main` always serves the latest commit (jsDelivr mirrors GitHub). Prefer to self-host? Download `wrap-balancer.min.js` and reference it locally instead:
+
+```html
+<script src="wrap-balancer.min.js"></script>
 ```
 
 ### Option B — ES module / bundler
@@ -82,7 +82,7 @@ Add `data-br-balance` to any text element. The script balances it on load, after
 ```html
 <h1 data-br-balance>The quick brown fox jumps over the lazy dog tonight</h1>
 
-<script src="wrap-balancer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js"></script>
 ```
 
 That's the whole integration. See [`examples/01-quickstart.html`](./examples/01-quickstart.html).
@@ -106,7 +106,7 @@ That's the whole integration. See [`examples/01-quickstart.html`](./examples/01-
 Disable auto-init via `data-auto="false"` and drive it yourself:
 
 ```html
-<script src="wrap-balancer.min.js" data-auto="false"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js" data-auto="false"></script>
 <script>
   const handles = WrapBalancer.balance('.title', { ratio: 1, preferNative: true })
   // handles[0].rebalance()

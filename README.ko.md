@@ -43,16 +43,16 @@
 
 ### 방법 A — `<script>` 태그 (일반 HTML 페이지에 권장)
 
-`wrap-balancer.min.js`를 HTML 옆에 두고 불러옵니다.
-
-```html
-<script src="wrap-balancer.min.js"></script>
-```
-
-또는 fork를 그대로 서빙하는 CDN(jsDelivr는 GitHub를 미러링)에서 불러올 수 있습니다.
+**jsDelivr CDN**에서 바로 불러옵니다 — 설치도 빌드도 필요 없습니다.
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js"></script>
+```
+
+`@main`은 항상 최신 커밋을 제공합니다 (jsDelivr가 GitHub를 미러링). 직접 호스팅하려면 `wrap-balancer.min.js`를 내려받아 로컬에서 불러오세요.
+
+```html
+<script src="wrap-balancer.min.js"></script>
 ```
 
 ### 방법 B — ES 모듈 / 번들러
@@ -82,7 +82,7 @@ WrapBalancer.balance('.title')
 ```html
 <h1 data-br-balance>The quick brown fox jumps over the lazy dog tonight</h1>
 
-<script src="wrap-balancer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js"></script>
 ```
 
 연동은 이게 전부입니다. [`examples/01-quickstart.html`](./examples/01-quickstart.html)을 참고하세요.
@@ -106,7 +106,7 @@ WrapBalancer.balance('.title')
 `data-auto="false"`로 자동 초기화를 끄고 직접 호출합니다.
 
 ```html
-<script src="wrap-balancer.min.js" data-auto="false"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/vanilla-wrap-balancer@main/wrap-balancer.min.js" data-auto="false"></script>
 <script>
   const handles = WrapBalancer.balance('.title', { ratio: 1, preferNative: true })
   // handles[0].rebalance()
