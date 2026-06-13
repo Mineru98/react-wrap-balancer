@@ -13,7 +13,7 @@
 - ✅ `[data-br-balance]` 요소 자동 초기화 + 간단한 프로그래밍 API
 - ✅ 네이티브 CSS `text-wrap: balance`를 우선 사용하고, 없으면 JS 이진 탐색으로 처리
 - ✅ 컨테이너 크기 변화(`ResizeObserver`), 내용 변화(`MutationObserver`)에 자동 재배치
-- ✅ React 원본과 **바이트 단위로 동일함을 504개 무작위 케이스로 증명** — [등가성 및 테스트](#등가성-및-테스트) 참고
+- ✅ React 원본과 **바이트 단위로 동일함을 644개 무작위 케이스로 증명** — [등가성 및 테스트](#등가성-및-테스트) 참고
 
 ---
 
@@ -50,7 +50,7 @@
 또는 fork를 그대로 서빙하는 CDN(jsDelivr는 GitHub를 미러링)에서 불러올 수 있습니다.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Mineru98/react-wrap-balancer@vanilla-js/vanilla/wrap-balancer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Mineru98/react-wrap-balancer@main/wrap-balancer.min.js"></script>
 ```
 
 ### 방법 B — ES 모듈 / 번들러
@@ -225,12 +225,12 @@ wrapper 인라인 스타일(`display:inline-block; vertical-align:top; text-deco
 
 `relayout`이 결정적이므로 등가성은 말로 때우는 게 아니라 **증명**할 수 있습니다. [`test/equivalence.html`](./test/equivalence.html)의 하니스는 바이트 단위로 동일한 DOM을 다음 둘에 입력합니다.
 
-- react-wrap-balancer **원본** `relayout` (`src/index.tsx`에서 1:1 전사), 그리고
+- react-wrap-balancer **원본** `relayout` (upstream [react-wrap-balancer](https://github.com/shuding/react-wrap-balancer)에서 그대로 전사, 하니스 안에 포함), 그리고
 - **바닐라** `WrapBalancer.relayout` / 고수준 `balance()`
 
 컨테이너 너비 7종 × 비율 5종 × 다수의 무작위 제목에 대해 결과 `max-width`가 **바이트 단위로 동일한지** 검증합니다.
 
-**결과: 504 / 504 케이스 동일.** 전체 등가성 기준은 [`test/rubric.md`](./test/rubric.md)의 루브릭을 참고하세요.
+**결과: 644 / 644 케이스 바이트 동일** (그중 543건에서 `scrollWidth` 클램프 분기 발동; 동작 31/31; min 동등성 144/144). 전체 등가성 기준은 [`test/rubric.md`](./test/rubric.md)의 루브릭을 참고하세요.
 
 로컬 실행:
 

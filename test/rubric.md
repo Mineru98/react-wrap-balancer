@@ -3,7 +3,9 @@
 > How we prove the vanilla port behaves **identically** to react-wrap-balancer.
 > Designed by an Opus test-architect agent, hardened by an independent Opus adversarial review (which found 2 real bugs + 1 coverage hole — all fixed, see [§5](#5-adversarial-review--bugs-found-and-fixed)), and executed in real browsers ([§6](#6-verification-results)).
 
-**Status:** ✅ Layer 0–1 (algorithmic) gate **PASSES** — 644/644 byte-identical, scrollWidth-clamp branch proven (543 cases). Behaviour suite 20/20. Minified-artifact parity 144/144.
+**Status:** ✅ Layer 0–1 (algorithmic) gate **PASSES** — 644/644 byte-identical, scrollWidth-clamp branch proven (543 cases). Behaviour suite 31/31. Minified-artifact parity 144/144.
+
+> **Note on paths (post-cleanup).** This rubric was written while the port lived under `vanilla/` next to the original React library. The repo has since been flattened to a pure vanilla project: `vanilla/wrap-balancer.js` is now **`wrap-balancer.js`** at the repo root, and the React sources it compares against (`src/index.tsx`, `src/utils.tsx`) were removed — those names refer to the upstream [react-wrap-balancer](https://github.com/shuding/react-wrap-balancer). The verbatim copy of the original `relayout` driving the head-to-head gate lives in [`test/equivalence.html`](./equivalence.html); CI suggestions that mention adding `export { relayout }` to `src/index.tsx` apply only if you build against an upstream checkout.
 
 ---
 
