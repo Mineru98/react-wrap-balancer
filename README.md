@@ -257,6 +257,46 @@ Browsers with native `text-wrap: balance` skip the JS entirely (when `preferNati
 
 ---
 
+## Agent skills (Claude Code & Codex)
+
+This repo ships more than the library. It also bundles two **agent skills** that teach an AI coding agent — **Claude Code** or **OpenAI Codex** — to apply this balancer for you and then *verify* the result: it renders Korean before/after screenshots and grades the improvement against a rubric.
+
+| Skill | What it does |
+|---|---|
+| **`wrap-balancer`** | Balances one heading (or a few). Injects the CDN `<script>`, adds `data-br-balance` + Korean `word-break: keep-all`, then renders before/after and scores the improvement. |
+| **`linebreak-audit`** | Sweeps a whole page or slide deck. Renders it headless, finds every awkward break (mid-word splits, last-line orphans, uneven lines, overflow), scores it 0–100, fixes it, and re-scans to confirm. |
+
+Both skills ship in two runtime-specific copies — same workflow, wired to each agent's tools:
+
+- **`.claude/skills/`** — for Claude Code (auto-discovered from the repo; uses the built-in `Agent` tool, no plugin required)
+- **`.codex/skills/`** — for OpenAI Codex (adds an `agents/openai.yaml` interface manifest; triggered with `$wrap-balancer`)
+
+### Install
+
+**Claude Code**
+
+- *Project skills (zero setup):* open this cloned repo with Claude Code and it auto-discovers `.claude/skills/`. Just ask in plain language ("balance this heading", or in Korean "이 제목 줄바꿈 예쁘게 해줘"), or call `/wrap-balancer` / `/linebreak-audit` explicitly.
+- *Personal skills (available in every project):* copy the two folders into your home skills dir (run from the repo root):
+
+  ```bash
+  mkdir -p ~/.claude/skills
+  cp -R .claude/skills/wrap-balancer .claude/skills/linebreak-audit ~/.claude/skills/
+  ```
+
+**Codex CLI**
+
+- *Project skills:* keep `.codex/skills/` in the repo — Codex scans it from your working directory up to the repo root. Trigger explicitly with `$wrap-balancer` / `$linebreak-audit`, or run `/skills` to list them.
+- *Personal skills (available everywhere):* copy the two folders into your home skills dir (run from the repo root):
+
+  ```bash
+  mkdir -p ~/.codex/skills
+  cp -R .codex/skills/wrap-balancer .codex/skills/linebreak-audit ~/.codex/skills/
+  ```
+
+Each skill is a self-contained folder — `SKILL.md` plus `scripts/`, `references/`, `agents/`, and `assets/` (a local copy of `wrap-balancer.min.js` for offline / CSP-blocked rendering). Restart the agent if a freshly-copied skill doesn't show up.
+
+---
+
 ## License
 
 MIT. Core algorithm © [Shu Ding](https://github.com/shuding) (react-wrap-balancer). Vanilla port maintained in this fork.

@@ -1,7 +1,7 @@
 # 전/후 렌더링 & 스크린샷 가이드
 
 목표: **같은 텍스트·너비·폰트**에서 밸런싱 전(before)과 후(after)를 각각 PNG로 찍어
-`/oh-my-claudecode:visual-verdict`와 `balance-quality-evaluator`에 넘길 수 있게 한다.
+이미지/수치 기반 시각 변화 확인과 `balance-quality-evaluator`에 넘길 수 있게 한다.
 한국어 폰트가 로드된 뒤 밸런싱이 끝난 시점에 찍는 것이 핵심이다.
 
 ## 1. 하니스 생성
@@ -146,8 +146,8 @@ print("metrics.json written")
 한 평가 단위(WORKDIR)에 다음이 있으면 충분하다:
 
 ```
-<WORKDIR>/harness/before.png      # visual-verdict reference / 에이전트 입력
-<WORKDIR>/harness/after.png       # visual-verdict generated / 에이전트 입력
+<WORKDIR>/harness/before.png      # 시각 변화 확인 / 에이전트 입력
+<WORKDIR>/harness/after.png       # 시각 변화 확인 / 에이전트 입력
 <WORKDIR>/harness/metrics.json    # (선택) 객관 지표
 <WORKDIR>/harness/compare.html    # 사람이 보는 나란히 비교
 ```
