@@ -1,0 +1,14 @@
+{
+  "name": "vanilla-wrap-balancer",
+  "owner": {
+    "name": "Mineru98",
+    "email": "mineru@usefullabs.co.kr"
+  },
+  "plugins": [
+    {
+      "name": "wrap-balancer",
+      "source": "./",
+      "description": "한국어 제목·페이지 줄바꿈 밸런싱 스킬 묶음 — wrap-balancer(제목 밸런싱)와 linebreak-audit(페이지/덱 전수 감사)"
+    }
+  ]
+}

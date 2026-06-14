@@ -275,8 +275,16 @@ Both skills ship in two runtime-specific copies — same workflow, wired to each
 
 **Claude Code**
 
-- *Project skills (zero setup):* open this cloned repo with Claude Code and it auto-discovers `.claude/skills/`. Just ask in plain language ("balance this heading", or in Korean "이 제목 줄바꿈 예쁘게 해줘"), or call `/wrap-balancer` / `/linebreak-audit` explicitly.
-- *Personal skills (available in every project):* copy the two folders into your home skills dir (run from the repo root):
+- *Plugin (easiest — install once, use in every project):* install straight from the GitHub repo with the `/plugin` command:
+
+  ```text
+  /plugin marketplace add Mineru98/vanilla-wrap-balancer
+  /plugin install wrap-balancer@vanilla-wrap-balancer
+  ```
+
+  This installs both skills (`wrap-balancer` + `linebreak-audit`) as one plugin. Then just ask in plain language ("balance this heading", or in Korean "이 제목 줄바꿈 예쁘게 해줘"), or call `/wrap-balancer` / `/linebreak-audit` explicitly.
+- *Project skills (no install):* open this cloned repo with Claude Code and it auto-discovers `.claude/skills/`.
+- *Personal skills (copy into your home dir):* run from the repo root:
 
   ```bash
   mkdir -p ~/.claude/skills

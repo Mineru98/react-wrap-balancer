@@ -1,0 +1,25 @@
+{
+  "name": "wrap-balancer",
+  "version": "1.0.0",
+  "description": "한국어 제목·페이지 줄바꿈을 균형 잡는 두 스킬 — wrap-balancer(제목 하나 밸런싱·전후 채점)와 linebreak-audit(페이지/슬라이드 덱 전수 감사·개선). vanilla-wrap-balancer 라이브러리를 주입·검증한다.",
+  "author": {
+    "name": "Mineru98",
+    "email": "mineru@usefullabs.co.kr"
+  },
+  "homepage": "https://github.com/Mineru98/vanilla-wrap-balancer",
+  "repository": "https://github.com/Mineru98/vanilla-wrap-balancer",
+  "license": "MIT",
+  "keywords": [
+    "wrap-balancer",
+    "typography",
+    "korean",
+    "line-break",
+    "text-wrap",
+    "balance",
+    "skill"
+  ],
+  "skills": [
+    "./.claude/skills/wrap-balancer",
+    "./.claude/skills/linebreak-audit"
+  ]
+}
